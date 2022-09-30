@@ -194,14 +194,19 @@ g= 60
 ultra_sleep = .05
 loopTime = 2.5
 zone = 30
-safe_distance = 15
+safe_distance = 20
 danger_distance = 15
 risk = False
+d_F_L = get_distance(trigPin_FL,echoPin_FL)
+sleep(ultra_sleep)
+print("2")
+d_F_R = get_distance(trigPin_FR,echoPin_FR)
+sleep(ultra_sleep)
+safe_zone = (d_F_L + d_F_R) / 3
 while(True):
-
-    print("HIIII")
+    print("//////////////////////////////////////////////")
 #   startTime = time.time()
-
+    servoSetAngle(60)
     d_F = get_distance(trigPin_F,echoPin_F)
     sleep(ultra_sleep)
     print("1")
@@ -219,134 +224,58 @@ while(True):
     print(f"R + L = {d_R + d_L}")
 
     print(f"Front = {d_F}")
-    print(f"D_F_R {d_F_R}")
-    print(f"D_L {d_L}")
+    #print(f"D_F_R {d_F_R}")
+    #print(f"D_L {d_L}")
     
     # Test UlraSonic DisConnect 
+
     if d_F == -1 or d_R == -1 or d_L == -1 or d_F_R == -1 or d_F_R == -1:
         print("PASS")
         pass
+    elif d_F < 20:
+        dcMotor(100,"s",p)
+        break 
+    elif abs(d_F_L + d_F_R) > 270 : 
+        if d_F_R > d_F_L:
+            servo_angle = 85
+            servoSetA
 
-    # Loop Action 
-    elif (statuse == 1) and (risk == False): #عند اكتشاف الزاوية ..... d100 = meter
-        print("Loop Action")
-        if cc == 1:
-            if d_R < safe_distance:
-                servo_angle += 5
-                servoSetAngle(servo_angle)
-            else:
-                if servo_angle != 85:    
-                    servo_angle= 85
-                    servoSetAngle(servo_angle)
-    
-        elif cc == 2:
-            if d_R < safe_distance:
-                servo_angle -= 5
-            else:
-                if servo_angle != 45: 
-                    servo_angle = 45
-                    servoSetAngle(servo_angle)
-    
 
-        # Test End of Loop
-        # if d_R + d_L < 120:
-        #     statuse = 0
-        for i in range(5):
-            if(cc == 1):
-                if d_R < danger_distance or d_F_R < danger_distance:
-                    servo_angle = 55
-                    servoSetAngle(servo_angle)
-                    break
-            elif (cc == 2):
-                if d_L < danger_distance or d_F_L < danger_distance:
-                    servo_angle = 65
-                    servoSetAngle(servo_angle)
-                    break
-            elif d_F < danger_distance:
-                dcMotor(100,"s",p)
-                dcMotor(100,"b",p)
-                sleep(1.5)
-                if d_F_R - d_F_L > 0:
-                    servo_angle += 25
-                    servoSetAngle(servo_angle)
-                else:
-                    servo_angle -= 25
-                    servoSetAngle(servo_angle)
-                dcMotor(100,"f",p)
-                sleep(1.5)
-                servo_angle = 60
-                servoSetAngle(servo_angle)
-            sleep(.5)
 
-           
-        statuse = 0
 
-    # Forwared Action
-    elif statuse == 0 and (risk == False):
-        print("Forwared Action")
+
+
+
+
+    # elif abs(d_F_R - d_F_L) < 14:
+    #     print("Status : FR")
+    #     if servo_angle != 60:
+    #         servo_angle =60
+    #         servoSetAngle(servo_angle)
+    # elif abs(d_L - d_F_L) > 10:
+    #     print("Correction")
+    #     if servo_angle != 60:
+    #         servo_angle =60
+    #         servoSetAngle(servo_angle)
+    # elif abs(d_F_R - d_F_L) >  15:
+    #     print("Diagonal")
+    #     if d_F_R < d_F_L:
+    #         servo_angle -= 5
+    #         servoSetAngle(servo_angle)
+    #     else:
+    #          servo_angle += 5
+    #          servoSetAngle(servo_angle)
         
-        
-        # Test LOOP
-        if d_L + d_R > 200:
-            if d_R > d_L:
-                cc = 1
-            else:
-                cc = 2
-            statuse = 1
-        
-        # Test Diagonal
-        elif abs(d_L - d_R) > 20:   # Diagonal 
-            print("Diagonal")
-            if d_L - d_R > 0:
-                servo_angle -= 5
-                servoSetAngle(servo_angle)
-            else:
-                servo_angle += 5
-                servoSetAngle(servo_angle)
-
-        elif abs(d_L - d_R) < 10:
-            if servo_angle != 60:
-                servo_angle = 60
-                servoSetAngle(servo_angle)
+    sleep(.2)
 
 
-                
 
 
-    
+   
 
-    # Test Risk 
-    if d_F < danger_distance or  d_L < danger_distance or d_R < danger_distance or d_F_L < danger_distance or d_F_R < danger_distance:
-        print("Test Risk ")
-        risk == True
-        if d_F < danger_distance:
-            dcMotor(100,"s",p)
-            dcMotor(100,"b",p)
-            sleep(1.5)
-            if d_F_R > 50:
-                servo_angle += 25
-                servoSetAngle(servo_angle)
-            else:
-                servo_angle -= 25
-                servoSetAngle(servo_angle)
-            dcMotor(100,"f",p)
-            sleep(1.5)
-            servo_angle = 60
-            servoSetAngle(servo_angle)
-
-        elif d_F_R < danger_distance or d_R < danger_distance:
-            servo_angle -= 20
-            servoSetAngle(servo_angle)
-
-        elif d_F_L < danger_distance or d_F_R < danger_distance:
-            servo_angle += 20
-            servoSetAngle(servo_angle)
-
-    else:
-        risk == False
-
-    if cv2.waitKey(20) & 0xFF == ord('q'):
+    key = cv2.waitKey(1)
+    if key == 27:
+        dcMotor(100,"s",p)
+        servoSetAngle(60)
         break
-    sleep(.3)
-dcMotor(100,"s",p)
-servoSetAngle(60)
+    
