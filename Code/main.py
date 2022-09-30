@@ -188,15 +188,16 @@ def take_angle():
 
 
 statuse = 0  # 0 => forwared   1 => loop      2 => Collision
-cc = 0
+cw = 0
 ####################### main loop
-g= 60
+
 ultra_sleep = .05
 loopTime = 2.5
 zone = 30
 safe_distance = 15
 danger_distance = 15
 risk = False
+road_width = 100
 while(True):
 
     print("HIIII")
@@ -230,7 +231,7 @@ while(True):
     # Loop Action 
     elif (statuse == 1) and (risk == False): #عند اكتشاف الزاوية ..... d100 = meter
         print("Loop Action")
-        if cc == 1:
+        if cw == 1:
             if d_R < safe_distance:
                 servo_angle += 5
                 servoSetAngle(servo_angle)
@@ -239,7 +240,7 @@ while(True):
                     servo_angle= 85
                     servoSetAngle(servo_angle)
     
-        elif cc == 2:
+        elif cw == 2:
             if d_R < safe_distance:
                 servo_angle -= 5
             else:
@@ -252,12 +253,12 @@ while(True):
         # if d_R + d_L < 120:
         #     statuse = 0
         for i in range(5):
-            if(cc == 1):
+            if(cw == 1):
                 if d_R < danger_distance or d_F_R < danger_distance:
                     servo_angle = 55
                     servoSetAngle(servo_angle)
                     break
-            elif (cc == 2):
+            elif (cw == 2):
                 if d_L < danger_distance or d_F_L < danger_distance:
                     servo_angle = 65
                     servoSetAngle(servo_angle)
@@ -286,25 +287,46 @@ while(True):
         print("Forwared Action")
         
         
-        # Test LOOP
-        if d_L + d_R > 200:
-            if d_R > d_L:
-                cc = 1
+        # Test LOOP  (Check LOOP)
+        if d_L + d_R > 270:
+            # Road Wide
+            if d_F > 70:
+                road_width = 100
             else:
-                cc = 2
+                road_width = 60
+            
+            # Check CW
+            if d_R > d_L:
+                cw = 1
+            else:
+                cw = 2
             statuse = 1
         
         # Test Diagonal
-        elif abs(d_L - d_R) > 20:   # Diagonal 
+         
+        # Midle Chick   Near Wall
+        elif abs(d_L - d_R) > 30:   #( dynamic Number )
             print("Diagonal")
             if d_L - d_R > 0:
-                servo_angle -= 5
+                servo_angle = 65
                 servoSetAngle(servo_angle)
             else:
-                servo_angle += 5
+                servo_angle = 55
                 servoSetAngle(servo_angle)
 
-        elif abs(d_L - d_R) < 10:
+        
+        #Angle Slope (Diagonal)
+        elif abs(d_F_L - d_L) > 20:
+            if d_F_L > d_L:
+                if servo_angle!= 55:
+                    servo_angle = 55
+                    servoSetAngle(servo_angle)
+            else:
+                if servo_angle != 65:
+                    servo_angle = 65
+                    servoSetAngle(servo_angle)
+
+        else:
             if servo_angle != 60:
                 servo_angle = 60
                 servoSetAngle(servo_angle)
